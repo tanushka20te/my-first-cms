@@ -11,7 +11,7 @@ class Article
     * @var int ID статей из базы данны
     */
     public $id = null;
-
+    public $active = 1;
     /**
     * @var int Дата первой публикации статьи
     */
@@ -69,6 +69,9 @@ class Article
         if (isset($data['content'])) {
             $this->content = $data['content'];
         }
+	if ( isset( $data['active'] ) ) {
+   	    $this->active = (int) $data['active'];
+}
     }
 
 
@@ -81,7 +84,9 @@ class Article
     {
         // Сохраняем все параметры
         $this->__construct($params);
-
+	if ( isset( $params['active'] ) ) {
+    		$this->active = (int) $params['active'];
+	}
         // Разбираем и сохраняем дату публикации
         if (isset($params['publicationDate'])) {
             $publicationDate = explode('-', $params['publicationDate']);
@@ -129,18 +134,23 @@ class Article
     public static function getList(
         $numRows = 1000000,
         $categoryId = null,
-        $order = "publicationDate DESC"
+        $order = "publicationDate DESC",
+	$activeOnly = false
     ) {
         $conn = new PDO(CmsConfig::$db_dsn, CmsConfig::$db_username, CmsConfig::$db_password);
         $fromPart = "FROM articles";
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
-        $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate)
-                AS publicationDate
-                $fromPart $categoryClause
-                ORDER BY  $order  LIMIT :numRows";
+        $whereClauses = [];
+	if ($categoryId) {
+   		 $whereClauses[] = "categoryId = :categoryId";
+	}
+	if ($activeOnly) {
+    		$whereClauses[] = "active = 1";
+	}
+	$whereSql = count($whereClauses) > 0 ? "WHERE " . implode(" AND ", $whereClauses) : "";
 
-        $st = $conn->prepare($sql);
-        $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
+	$sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) AS publicationDate FROM articles $whereSql ORDER BY " . $order . " LIMIT :numRows";
+	$st = $conn->prepare($sql);       
+ 	$st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
         /**
          * Можно использовать debugDumpParams() для отладки параметров,
          * привязанных выше с помощью bind()
@@ -160,7 +170,7 @@ class Article
         }
 
         // Получаем общее количество статей, которые соответствуют критерию
-        $sql = "SELECT COUNT(*) AS totalRows $fromPart $categoryClause";
+        $sql = "SELECT COUNT(*) AS totalRows $fromPart $whereSql";
         $st = $conn->prepare($sql);
         if ($categoryId) {
             $st->bindValue(":categoryId", $categoryId, PDO::PARAM_INT);
@@ -222,7 +232,7 @@ class Article
         $conn = new PDO(CmsConfig::$db_dsn, CmsConfig::$db_username, CmsConfig::$db_password);
         $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
             . " categoryId=:categoryId, title=:title, summary=:summary,"
-            . " content=:content WHERE id = :id";
+            . " content=:content,active=:active WHERE id = :id";
 
         $st = $conn->prepare($sql);
         $st->bindValue(":publicationDate", $this->publicationDate, PDO::PARAM_INT);
@@ -231,6 +241,7 @@ class Article
         $st->bindValue(":summary", $this->summary, PDO::PARAM_STR);
         $st->bindValue(":content", $this->content, PDO::PARAM_STR);
         $st->bindValue(":id", $this->id, PDO::PARAM_INT);
+	$st->bindValue( ":active", $this->active, PDO::PARAM_INT );
         $st->execute();
         $conn = null;
     }

@@ -32,6 +32,13 @@
                 <textarea name="content" id="content" placeholder="The HTML content of the article" required maxlength="100000" style="height: 30em;">
             <?php echo htmlspecialchars( $article ? $article->content : '' )?>
               </textarea>
+	</li>
+	<li>
+	<p>
+   	 <label for="active">Активна (показывать на сайте):</label>
+   	 <input type="hidden" name="active" value="0">
+   	 <input type="checkbox" name="active" value="1" id="active" <?php if ($article->active == 1) echo 'checked'; ?>>
+	</p>
               </li>
 
               <li>

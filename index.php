@@ -86,7 +86,7 @@ function viewArticle()
 function homepage()
 {
     $results = array(); // $const->homepage_num_articles
-    $data = Article::getList(CmsConfig::$homepage_num_articles);
+    $data = Article::getList(CmsConfig::$homepage_num_articles,null, "publicationDate DESC", true);
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
 

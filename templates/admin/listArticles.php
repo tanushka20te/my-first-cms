@@ -16,8 +16,9 @@
           <table>
             <tr>
               <th>Publication Date</th>
-              <th>Article</th>
+              <th>Article</th> 	
               <th>Category</th>
+	     <th>Активна</th>
             </tr>
 
 <!--<?php echo "<pre>"; print_r ($results['articles'][2]->publicationDate); echo "</pre>"; ?> Обращаемся к дате массива $results. Дата = 0 -->
@@ -25,8 +26,8 @@
     <?php foreach ( $results['articles'] as $article ) { ?>
 
             <tr onclick="location='admin.php?action=editArticle&amp;articleId=<?php echo $article->id?>'">
-              <td><?php echo date('j M Y', $article->publicationDate)?></td>
-              <td>
+              <td><?php echo date('j M Y', $article->publicationDate)?></td>             
+ <td>
                 <?php echo $article->title?>
               </td>
               <td>
@@ -43,6 +44,7 @@
                 echo "Без категории";
                 }?>
               </td>
+<td><?php echo $article->active == 1 ? 'Да' : 'Нет'; ?></td>
             </tr>
 
     <?php } ?>

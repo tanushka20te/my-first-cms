@@ -6,9 +6,9 @@
 class CmsConfig
 {
     public static int $homepage_num_articles = 6;
-    public static string $db_password = 'rw45e45e4e46';
+    public static string $db_password = '';
     public static string $db_dsn = 'mysql:host=localhost;dbname=cms;charset=utf8;';
-    public static string $db_username = 'drl';
+    public static string $db_username = 'root';
     public static string $class_path = 'classes';
     public static string $template_path = 'templates';
     public static string $admin_username = 'admin';
